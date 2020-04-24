@@ -1,0 +1,122 @@
+body
+{
+  color: white;
+  font-family: Palatino;
+  font-size: 15px;
+  line-height:1.4;
+}
+
+.header
+{
+  overflow: hidden;
+  background-color: #1e2e47;
+  padding: 10px;
+}
+
+.header a
+{
+  color: white;
+  text-align: center;
+  padding: 20px;
+  text-decoration: none;
+  font-size: 18px;
+  font-family: Helvetica;
+  border-radius: 12px;
+}
+
+.header a:hover
+{
+  background-color: #495572;
+  color: white;
+}
+
+.header a.active
+{
+  background-color: #495572;
+  color: white;
+}
+
+/* this controls the viewport resize */
+@media screen and (max-width: 500px)
+{
+  .header a
+  {
+    float: none;
+    display: block;
+    text-align: left;
+  }
+}
+
+table {
+  border: 1px solid white;
+  width: 80%;
+  text-align: left;
+  border-collapse: collapse;
+}
+
+table.tablelogin {
+  width: 200px;
+  border: 0px;
+  text-align: left;
+  border-collapse: collapse;
+}
+
+table.tableemployee {
+  width: 50%;
+  border: 0px;
+  text-align: left;
+  border-collapse: collapse;
+}
+
+table.tableaddemployee {
+  width: 30%;
+  text-align: left;
+  border-collapse: collapse;
+}
+
+table.tablecontactus {
+  width: 500px;
+  border: 0px;
+  background-color: #495572;
+  text-align: left;
+  border-collapse: collapse;
+}
+
+table.tableregister {
+  width: 500px;
+  border: 0px;
+  background-color: #495572;
+  text-align: left;
+  border-collapse: collapse;
+}
+
+table.tablecustomers {
+  width: 300px;
+  border: 0px;
+  background-color: #495572;
+  text-align: left;
+  border-collapse: collapse;
+}
+
+td {
+  border: 1px solid white;
+  border-radius: 2px;
+}
+td.tdlogin {
+  border: 0px;
+  padding: 2px;
+  text-align: right;
+}
+
+img.products {
+  horizontal-align: middle;
+}
+img.logo {
+  height: 200px;
+  width: 800px;
+  border-radius: 20px;
+}
+
+* {
+  box-sizing: border-box;
+}

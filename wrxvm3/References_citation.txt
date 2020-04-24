@@ -1,0 +1,32 @@
+# this file is for references and citation of images and product notes
+
+index.php includes images from:
+{
+	bmw > autoblog.com
+	subaru > autoblog.com
+	logo was made by me in photoshop using those two pictures
+}
+
+products.php includes images and product information from:
+{
+	bimmerworld.com
+	autohausaz.com
+	ecstuning.com
+	fastwrx.com
+	subimods.com
+	subispeed.com
+}
+
+
+tutorials and manuals from:
+{
+	www.php.net
+	PDF book sample source code
+	w3schools.com
+	
+}
+
+profile_icon:
+{
+getdrawings.com and exported from png to jpg
+}
