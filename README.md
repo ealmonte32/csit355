@@ -1,2 +1,3 @@
 # csit355
-Databse Administration class files
+Database Administration project files.
+Mostly MySQL, PHP, HTML, and some CSS.
