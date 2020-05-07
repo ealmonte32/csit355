@@ -1,3 +1,5 @@
+/* ealmonte */
+
 body
 {
   color: white;
@@ -6,11 +8,15 @@ body
   line-height:1.4;
 }
 
+a {
+  color: #ff6f00;
+}
+
 .header
 {
   overflow: hidden;
   background-color: #1e2e47;
-  padding: 10px;
+  padding: 20px;
 }
 
 .header a
@@ -26,7 +32,7 @@ body
 
 .header a:hover
 {
-  background-color: #495572;
+  background-color: #333b4f;
   color: white;
 }
 
@@ -36,15 +42,53 @@ body
   color: white;
 }
 
-/* this controls the viewport resize */
-@media screen and (max-width: 500px)
-{
+img.products {
+  horizontal-align: middle;
+}
+
+/* change the styles below when browser window is 601px wide or higher */
+@media screen and (min-width: 601px){
+  img.logo
+  {
+  	height: 200px;
+  	width: 800px;
+  	border-radius: 20px;
+  }
+}
+
+/* change the styles below when browser window is 600px wide or less */
+@media screen and (max-width: 600px){
   .header a
   {
-    float: none;
+    float: top;
     display: block;
     text-align: left;
   }
+  
+  img.logo
+  {
+	height: 100px;
+  	width: 100%;
+  	border-radius: 20px;
+  }
+  body
+	{
+ 	 color: white;
+ 	 font-family: Palatino;
+	 font-size: 12px;
+ 	 line-height:1.4;
+	}
+	
+  .header a
+	{
+  	color: white;
+  	text-align: center;
+  	padding: 20px;
+  	text-decoration: none;
+  	font-size: 14px;
+  	font-family: Helvetica;
+  	border-radius: 12px;
+	}
 }
 
 table {
@@ -106,15 +150,6 @@ td.tdlogin {
   border: 0px;
   padding: 2px;
   text-align: right;
-}
-
-img.products {
-  horizontal-align: middle;
-}
-img.logo {
-  height: 200px;
-  width: 800px;
-  border-radius: 20px;
 }
 
 * {

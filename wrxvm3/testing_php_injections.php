@@ -41,7 +41,8 @@ print_r($result4); echo "<br>";echo "<br>";
 
 
 /*
-	As we can see on the results page (depending which method of quotes you used on the WHERE Email= clause) the filter_input built-in function works to protect from sql injection similar to the way the addslashes built-in function does.
+	As we can see on the results page (depending which method of quotes you used on the WHERE Email= clause),
+	the filter_input built-in function works to protect from sql injection similar to the way the addslashes built-in function does.
 */
 
 session_destroy();

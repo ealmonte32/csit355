@@ -25,9 +25,9 @@ include('../wrxvm3_priv/functions.php');
 <div style="padding:20px">
 
 <main>
-<img src="images/login_page_logo.jpg" height="60px" width="60px">
+<img src="images/login_page_logo.jpg" style="height:60px; width:60px; border-radius:20%">
 <br>
-<br>
+<br>Customer Account
 <form action="login.php" method="post">
 <table class="tablelogin">
 <tr>
@@ -48,6 +48,7 @@ include('../wrxvm3_priv/functions.php');
 <p>
 Don't have an account with us? Register <a href="customer_register.php" style="color: white">here</a>.
 </p><br>
+<a href="login_emp.php">Employee Login</a>
 
 </div>
 <br>

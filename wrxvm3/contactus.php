@@ -20,7 +20,7 @@
 </div>
 
 <div style="padding:20px">
-<img src="images/contactus_icon.jpg" height="60px" width="60px">
+<img src="images/contactus_icon.jpg" style="height:60px; width:60px; border-radius:20%">
 <h3>Need help? Please fill out the form below with your inquiry:</h3>
 
 <form action="submit_inquiry.php" method="post">

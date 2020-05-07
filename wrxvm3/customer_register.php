@@ -5,9 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="stylesheet" type="text/css" href="style.css" />
 </head>
-
 <body bgcolor="#1e2e47">
-
 <center>
 <div>
 <img src="logo_top.jpg" class="logo">
@@ -20,7 +18,7 @@
 </div>
 
 <div style="padding:20px">
-<img src="images/customer_register_logo.jpg" height="60px" width="60px">
+<img src="images/customer_register_logo.jpg" style="height:60px; width:60px; border-radius:20%">
 <h3>Please complete the form below to create an account with us.</h3>
 
 <table class="tableregister">
@@ -57,8 +55,8 @@
 <td>Vehicle Model:</td>
  <td>
 <select name="vehiclemodel">
-  <option value="bmwm3">BMW M3</option>
-  <option value="subaruwrx">Subaru WRX</option>
+  <option value="BMW M3">BMW M3</option>
+  <option value="Subaru WRX">Subaru WRX</option>
 </select>
 </td>
 </tr>

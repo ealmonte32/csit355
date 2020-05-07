@@ -23,10 +23,12 @@ tutorials and manuals from:
 	www.php.net
 	PDF book sample source code
 	w3schools.com
+	tutorialspoint.com (actually used just to read some of the explanations of some php functions because php.net doesn't really explain in layman's terms)
 	
 }
 
-profile_icon:
+profile_icon and starwars icons:
 {
-getdrawings.com and exported from png to jpg
+	getdrawings.com
+	iconarchive.com
 }

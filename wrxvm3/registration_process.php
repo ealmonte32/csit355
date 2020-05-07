@@ -1,6 +1,5 @@
 <?php
-
-require_once('../wrxvm3_priv/database.php'); //connect to db
+require_once('../wrxvm3_priv/database.php');
 
 // Get the user data from registration and assign to variables
 $var_firstname = filter_input(INPUT_POST, 'firstname');
@@ -14,52 +13,17 @@ $var_dob = filter_input(INPUT_POST, 'dob');
 $var_vehiclemodel = filter_input(INPUT_POST, 'vehiclemodel');
 $var_vehicleyear = filter_input(INPUT_POST, 'vehicleyear', FILTER_SANITIZE_NUMBER_INT);
 
-/*
-// this functions checks if the email address entered by user already exists on the customers table
-function checkEmailExist() {
-
-//make global of var_email to access outside of function
-global $var_email, $db;
-
-
-// connection info
-$dsn = 'mysql:host=localhost;dbname=wrxvm3';
-$user = 'root';
-$pass = '';
-
-
-//$tempconnect = @ new PDO($dsn, $user, $pass);
-
-// now that we opened a temporary connection to database, run the query on the customer table
-$email_check_query = $db->query("SELECT * FROM almontee3_CUSTOMERS WHERE Email='$var_email'");//" LIMIT 1");
-$result = $email_check_query->fetch();
-
-echo $result;
-
-// if the email already exists on customers table - return false
-if ($result['Email'] == $var_email) {
-    return false;
-    //$tempconnect = null; // close the connection
-    }
-
-//function close
-}
-*/
-
 //query the database table
-$email_check_query = $db->query("SELECT * FROM almontee3_CUSTOMERS WHERE Email='$var_email'");//" LIMIT 1");
+$email_check_query = $db->query("SELECT * FROM almontee3_CUSTOMERS WHERE Email='$var_email'");
 $result = $email_check_query->fetchAll();
 
-// Validate inputs make sure not null/empty - we could have also used empty($var) but i like it this way
+// Validate inputs make sure not null/empty
 if (empty($var_firstname) || empty($var_lastname) || empty($var_email) || empty($var_password) || empty($var_shippingaddress) || empty($var_vehiclemodel) || empty($var_vehicleyear)) {
     echo "Error: Some fields cannot be left empty. Check all fields and try again.";
-    //include('error.php');
-
     }
     // check if email exists on database table
     elseif ($result['Email'] == $var_email) {
         echo "Error: That E-mail address already exists.";
-        //include('error.php');
         }
 else {
 
