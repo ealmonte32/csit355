@@ -1,3 +1,8 @@
+<?php
+header("X-Frame-Options: SAMEORIGIN");
+header("X-XSS-Protection: 1");
+header("X-Content-Type-Options: nosniff");
+?>
 <!DOCTYPE html>
 <html>
 <head>
@@ -27,11 +32,11 @@
 <table class="tablecontactus">
 <tr>
 <td>First Name:</td>
-<td><input type="text" name="firstname" size="35" autofocus required><br></td>
+<td><input type="text" name="firstname" size="35" maxlength="32" pattern="[A-Za-z-]+" title="Letters only, no spaces" autofocus required><br></td>
 </tr>
 <tr>
 <td>Last Name:</td>
-<td><input type="text" name="lastname" size="35" required><br></td>
+<td><input type="text" name="lastname" size="35" maxlength="32" pattern="[A-Za-z-]+" title="Letters only, no spaces" required><br></td>
 </tr>
 <tr>
 <td>E-mail:</td>

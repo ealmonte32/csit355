@@ -1,17 +1,25 @@
 <?php
+header("X-Frame-Options: SAMEORIGIN");
+header("X-XSS-Protection: 1");
+header("X-Content-Type-Options: nosniff");
+
+session_cache_limiter('nocache');
 session_start();
 require_once('../wrxvm3_priv/database.php');
+require_once('error_handling.php');
+
+// dual check if the user is not logged in, send back to login page
+if(!isset($_SESSION['user'])) {
+    header("location: login.php");
+    exit;
+}
 
 if (!isLoggedIn()) {
-    echo "You must be logged in.";
     header("location: login.php");
+    exit;
 }
 
-if (isset($_GET['logout'])) {
-    session_destroy();
-    unset($_SESSION['user']);
-}
-
+// function that checks current user session
 function isLoggedIn() {
     $currentuser = $_SESSION['user'];
     if ($currentuser['UserType'] == 'customer')
@@ -20,12 +28,37 @@ function isLoggedIn() {
         return false;
 }
 
+// logout
+if(isset($_POST['logout'])) {
+    $_SESSION = array(); //unset all session variables
+    session_unset();
+
+    if (ini_get("session.use_cookies")) { //delete the session cookie
+        $params = session_get_cookie_params();
+        setcookie(session_name(), '', time() - 42000,
+        $params["path"], $params["domain"],
+        $params["secure"], $params["httponly"]);
+    }
+
+    if (session_destroy()) { //destroy the session
+        header("location: login.php");
+        exit;
+    }
+}
+
+
 // this is for adding items to shopping cart
 if (isset($_POST["add_to_cart"])) // if the add_to_cart post action was executed
 {
+    if (empty($_SESSION["shopping_cart"]))
+    {
+        $_SESSION["shopping_cart"] = [];
+    }
+
     if (isset($_SESSION["shopping_cart"])) //check if variable named shopping_cart is set in the current session
     {
         $item_array_id = array_column($_SESSION["shopping_cart"], "product_id"); //set product_id as column key
+        
         if (!in_array($_GET["ProductID"], $item_array_id)) //if product id is not in the array, add it
             {
             $count = count($_SESSION["shopping_cart"]); //count the number of elements in array
@@ -43,18 +76,6 @@ if (isset($_POST["add_to_cart"])) // if the add_to_cart post action was executed
             echo '<script>alert("This item is already in Shopping Cart. To change quantity, please remove it first.")</script>';
             }
         }
-    else //if shopping_cart session is not set, build the item array, start the session and add the items to index 0
-    {
-        $item_array = array(
-        'product_id'        => $_GET["ProductID"],
-        'product_name'      => $_POST["hidden_product_name"],
-        'product_number'    => $_POST["hidden_product_number"],
-        'product_price'     => $_POST["hidden_product_price"],
-        'product_quantity'  => $_POST["quantity"] );
-        $_SESSION["shopping_cart"][0] = $item_array; //start in offset 0
-        // test the issuing of the ++ instead of the [0]
-        }
-        echo '<script>alert("Product has been added to cart.")</script>';
     }
 
 
@@ -77,9 +98,9 @@ if ($_GET["action"] == "delete") //delete specific item
 if ($_GET["action"] == "empty_cart") //empty the entire shopping cart
     {
         //clear all variables in the session
-        header('location: customer_dashboard.php?#shoppingcart'); //after emptying the shopping cart, stay in section to see it cleared
         unset ($_SESSION["shopping_cart"]);
-        echo '<script>alert("Shopping Cart Emptied!")</script>';
+        //after emptying the shopping cart, stay in section to see it cleared
+        echo "<script>alert('Shopping Cart Emptied!'); window.location.href='customer_dashboard.php?#shoppingcart';</script>";
     }
 }
 
@@ -94,27 +115,47 @@ if ($_GET["action"] == "empty_cart") //empty the entire shopping cart
 
 <body bgcolor="#1e2e47">
 
+<div id="topdashboard"></div>
+
 <img src="images/profile_icon.jpg" style="width:50px; height:50px; border-radius:50%"><br>
-<b>Welcome, <?php echo $_SESSION['fname']; ?>.<br><br></b>
+<b>Welcome, <?php echo $_SESSION['fname']; ?>.<br>
+
+<form method="post">
+<input style="color: red" type="submit" name="logout" value="Log out">
+</form>
+<br><br>
+
+<hr style="border: 1px dotted orange;" />
+<h3 style="color: orange">Account Information:</h3>
+
+<u>Customer ID: </u><br><?php echo $_SESSION['customerid']; ?><br><br>
+<u>Email: </u><br><?php echo $_SESSION['email']; ?><br><br>
 <u>Shipping Address: </u><br><?php echo $_SESSION['address']; ?><br><br>
 <u>Current Vehicle: </u><br><?php echo $_SESSION['vehicleyear']; echo " "; echo $_SESSION['vehiclemodel']; ?><br><br>
 <u>Telephone: </u><br><?php echo $_SESSION['telephone']; ?><br><br>
 
-<a href="customer_profile.php" style="color:orange; text-decoration: none">Update My Info</a>
-<br><br><br>
+<h3 style="color: orange">Actions: 
+<form action="customer_profile.php">
+<input type="submit" value="Update My Profile">
+</form>
 
+<form action="customer_order_history.php">
+<input type="submit" value="Order History">
+</form>
 
-<b><a href="login.php?logout='1'" style="color:red;">Log out</a></b>
-<br><br>
+<form action="customer_dashboard.php#shoppingcart">
+<input type="submit" value="My Shopping Cart">
+</form>
 
-<hr style="border: 1px dotted white;" />
+</h3>
+<br>
+<hr style="border: 1px dotted orange;" />
 
-<div id="topdashboard">
-<h2 align="left">Current Products Inventory :<br>
+<h2 align="left">WRX vs M3 Products Inventory :<br>
 <form action="customer_dashboard.php">
 <input type="submit" value="Show All Products">
 </form></h2>
-</div>
+
 
 Filter by Vehicle:
 <form method="post" action="customer_dashboard.php?action=filterby">
@@ -126,7 +167,7 @@ Filter by Vehicle:
 </form><br>
 
 Filter by Category:
-<form method="post" action="customer_dashboard.php?action=filterbycategory">
+<form method="post" action="customer_dashboard.php?action=filterby&action=filterbycategory">
 <select name="productcategory">
     <option value="Engine">Engine</option>
     <option value="Air Filters">Air Filters</option>
@@ -156,12 +197,16 @@ if(isset($_POST['filterby'])){ //this prevents the notice if post is currently e
     $vehiclemodel = filter_input(INPUT_POST, 'vehiclemodel');
     $query = $db->query("SELECT * FROM almontee3_PRODUCTS WHERE FitsVehicle='$vehiclemodel' ORDER BY ProductID");
     $result = $query->fetchAll();
+
+    //lets set a current vehicle variable into the session for when filtering by category
+    $_SESSION["currentvehiclemodel"] = $vehiclemodel;
 }
 
 //if condition for category filtering
 if(isset($_POST['filterbycategory'])){ //this prevents the notice if post is currently empty
+    $vehiclemodel = $_SESSION["currentvehiclemodel"]; //get the current selected session vehicle
     $productcategory = filter_input(INPUT_POST, 'productcategory');
-    $query = $db->query("SELECT * FROM almontee3_PRODUCTS WHERE Category='$productcategory' ORDER BY ProductID");
+    $query = $db->query("SELECT * FROM almontee3_PRODUCTS WHERE (Category='$productcategory') AND (FitsVehicle='$vehiclemodel') ORDER BY ProductID");
     $result = $query->fetchAll();
 }
 
@@ -176,29 +221,37 @@ foreach ($result as $row)
 {
 
 ?>
-<div style="width:50%">
+
+
 <form method="post" action="customer_dashboard.php?action=add&ProductID=<?php echo $row["ProductID"]; ?>" />
-    <div style="border:1px solid black; padding: 10px; background-color:#0c2438;">
-    <img src="<?php echo $row["ImageLocation"]; ?>" style="width:150px;height:150px" /><p>
+    <table style="background-color:#0c2438;">
+    <tr>
+    <td style="border:1px solid black; width: 150px;">
+    <img src="<?php echo $row["ImageLocation"]; ?>" style="width:150px;height:155px; padding: 3px"></td>
+    
+    <td style="border:1px solid black; padding: 10px">
     <b>Product Name: </b><?php echo $row["ProductName"]; ?><br>
     <b>Product Number: </b><?php echo $row["ProductNumber"]; ?><br>
-    <b>VendorID: </b><?php echo $row["VendorID"]; ?><p>
-    <b>Description: </b><?php echo $row["Description"]; ?><p>
-    <b>Price: $</b><?php echo $row["UnitPrice"]; ?><p>
+    <b>Fits Vehicle: </b><?php echo $row["FitsVehicle"]; ?><br>
+    <b>Description: </b><?php echo $row["Description"]; ?><br><br>
+    <b>Price: $</b><?php echo $row["UnitPrice"]; ?><br>
     <input type="number" name="quantity" min="1" max="99" style="width:50px" value="1" />
     <input type="hidden" name="hidden_product_name" value="<?php echo $row["ProductName"]; ?>" />
     <input type="hidden" name="hidden_product_number" value="<?php echo $row["ProductNumber"]; ?>" />
     <input type="hidden" name="hidden_product_price" value="<?php echo $row["UnitPrice"]; ?>" />
     <input type="submit" name="add_to_cart" style="margin-top:3px;" value="Add to Cart" />
-    </div><br>
+    </td></tr>
+    </table>
+    <br>
 </form>
-</div>
+
+
 <?php
 }
 ?>
 <a href="customer_dashboard.php#topdashboard" style="color:lightblue; text-decoration: none">^-Return To Top</a>
 
-<hr style="border: 1px dotted white;" />
+<hr style="border: 1px dotted orange;" />
 <div id="shoppingcart"></div>
 <br>
 <h3>Shopping Cart</h3>
@@ -255,7 +308,7 @@ foreach ($result as $row)
 <input type="submit" name="checkout" value="Checkout">
 </form></p>
 </div>
-
+<br>
 <footer>
 <center>
 <h5>Copyright &copy; 2020 WRXvsM3 LLC</h5></footer>

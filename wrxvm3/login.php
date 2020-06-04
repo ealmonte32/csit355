@@ -1,5 +1,6 @@
 <?php
-include('../wrxvm3_priv/functions.php');
+//login
+require_once('../wrxvm3_priv/functions.php');
 ?>
 <!DOCTYPE html>
 <html>

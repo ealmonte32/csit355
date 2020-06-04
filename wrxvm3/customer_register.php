@@ -25,19 +25,19 @@
 <form action="registration_process.php" method="post">
 <tr>
 <td>First Name:</td>
-<td><input type="text" name="firstname" size="30" autofocus required><br></td>
+<td><input type="text" name="firstname" size="30" maxlength="32" pattern="[A-Za-z-]+" title="Letters only, no spaces" autofocus required><br></td>
 </tr>
 <tr>
 <td>Last Name:</td>
-<td><input type="text" name="lastname" size="30" required><br></td>
+<td><input type="text" name="lastname" size="30" maxlength="32" pattern="[A-Za-z-]+" title="Letters only, no spaces" required><br></td>
 </tr>
 <tr>
 <td>E-mail:</td>
-<td><input type="email" name="emailaddress" size="30" placeholder="email@example.com" required><br></td>
+<td><input type="email" name="emailaddress" size="30" maxlength="64" placeholder="email@example.com" required><br></td>
 </tr>
 <tr>
 <td>Password:</td>
-<td><input type="password" name="password" size="30" required><br></td>
+<td><input type="password" name="password" size="30" maxlength="64" required><br></td>
 </tr>
 <tr>
 <td>Telephone:</td>
@@ -45,7 +45,7 @@
 </tr>
 <tr>
 <td>Shipping Address:</td>
-<td><input type="text" name="shippingaddress" size="30" placeholder="1 Sample Street, ExampleCity, NJ, 00000" required><br></td>
+<td><input type="text" name="shippingaddress" size="30" maxlength="64" placeholder="1 Sample Street, ExampleCity, NJ, 00000" required><br></td>
 </tr>
 <tr>
 <td>Date of Birth:</td>

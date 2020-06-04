@@ -1,18 +1,25 @@
 <?php
+header("X-Frame-Options: SAMEORIGIN");
+header("X-XSS-Protection: 1");
+header("X-Content-Type-Options: nosniff");
+
+session_cache_limiter('nocache');
 session_start();
 require_once('../wrxvm3_priv/database.php');
+require_once('error_handling.php');
+
+// dual check if the user is not logged in, send back to login_emp page
+if(!isset($_SESSION['user'])) {
+    header("location: login_emp.php");
+    exit;
+}
 
 if (!isLoggedIn()) {
     header("location: login_emp.php");
-    //echo "You must be logged in.";
-    exit();
+    exit;
 }
 
-if (isset($_GET['logout'])) {
-    session_destroy();
-    unset($_SESSION['user']);
-}
-
+// function that checks current user session
 function isLoggedIn() {
     $currentuser = $_SESSION['user'];
     if ($currentuser['UserType'] == 'sales')
@@ -21,12 +28,31 @@ function isLoggedIn() {
         return false;
 }
 
+// logout
+if(isset($_POST['logout'])) {
+    $_SESSION = array(); //unset all session variables
+    session_unset();
+
+    if (ini_get("session.use_cookies")) { //delete the session cookie
+        $params = session_get_cookie_params();
+        setcookie(session_name(), '', time() - 42000,
+        $params["path"], $params["domain"],
+        $params["secure"], $params["httponly"]);
+    }
+
+    if (session_destroy()) { //destroy the session
+        header("location: login_emp.php");
+        exit;
+    }
+}
+
 
 //if product remove button is clicked
 if(isset($_POST['removeproductid'])){ //this prevents the notice if post is currently empty
     $removeproductid = filter_input(INPUT_POST, 'removeproductid', FILTER_SANITIZE_NUMBER_INT);
     $query = $db->prepare("DELETE FROM almontee3_PRODUCTS WHERE ProductID='$removeproductid'");
     $statement = $query->execute();
+    echo "<script>alert('Product removed!'); window.location.href='sales_dashboard.php';</script>";
 }
 
 //if remove inquiry button is clicked
@@ -34,6 +60,7 @@ if(isset($_POST['removeinquiryid'])){ //this prevents the notice if post is curr
     $removeinquiryid = filter_input(INPUT_POST, 'removeinquiryid', FILTER_SANITIZE_NUMBER_INT);
     $query = $db->prepare("DELETE FROM almontee3_INQUIRIES WHERE InquiryID='$removeinquiryid'");
     $statement = $query->execute();
+    echo "<script>alert('Inquiry removed!'); window.location.href='sales_dashboard.php#inquiries';</script>";
 }
 
 ?>
@@ -46,30 +73,41 @@ if(isset($_POST['removeinquiryid'])){ //this prevents the notice if post is curr
 </head>
 
 <body bgcolor="#3d3818">
-
 <div id="topdashboard"></div>
-
+<div style="padding-left: 30px; padding-top: 10px; padding-right: 30px">
 <img src="images/sales_user_icon.jpg" style="width:50px; height:50px; border-radius:50%"><br>
-<b>Welcome, <?php echo $_SESSION['fname'] . " " . $_SESSION['lname']; ?>.<br></b>
-<i>May the force be with you today, and may it give you the patience to handle customers.</i><br><br></b>
+<b>Welcome, <?php echo $_SESSION['fname'] . " " . $_SESSION['lname']; ?>.</b><br>
+<i>May the force be with you today, and may it give you the patience to handle customers.</i><br><br>
 
-<u>Employee ID: </u><br><?php echo $_SESSION['employeeid']; ?><br><br>
-<u>Job Title: </u><br><?php echo $_SESSION['jobtitle']; ?><br><br>
+<u style="color: orange">Employee ID: </u><br><?php echo $_SESSION['employeeid']; ?><br><br>
+<u style="color: orange">Job Title: </u><br><?php echo $_SESSION['jobtitle']; ?><br><br>
 
-<u>Go to dashboard area:</u><br>
-<a href="sales_dashboard.php#add_a_product" style="color:lightblue; text-decoration: none"> +Add A Product</a><br>
-<a href="sales_dashboard.php#inquiries" style="color:lightblue; text-decoration: none"> +Inquiries</a><br>
+<h3 style="color: orange">Actions: 
+<form action="sales_dashboard.php#add_a_product">
+<input type="submit" value="Add a Product">
+</form>
 
-<br><br>
-<b><a href="login_emp.php?logout='1'" style="color:red;">Log out</a></b>
-<br><br>
+<form action="sales_dashboard.php#inquiries">
+<input type="submit" value="Inquiries">
+</form>
+
+<form action="sales_dashboard.php#orders">
+<input type="submit" value="Customer Orders">
+</form>
+
+<form method="post">
+<input style="color: red" type="submit" name="logout" value="Log out">
+</form>
+</h3>
+<br>
 
 <hr style="border: 1px dotted white;" />
 
 <div>
 <h2 align="left">Products in Inventory :<br>
-<form action="sales_dashboard.php">
-<input type="submit" value="Show All Products">
+
+<form method="get" action="sales_dashboard.php?action=showall">
+<input type="submit" name="showall" value="Show All Products">
 </form></h2>
 </div>
 
@@ -96,7 +134,7 @@ Filter by Category:
 
 
 <form method="post" action="sales_dashboard.php?action=searchby">
-Product Description or Part Number: <br>
+Product Description or Product Number: <br>
 <input type="text" name="searchterm" size="30">
 <input type="submit" name="searchby" value="Search">
 </form>
@@ -104,26 +142,31 @@ Product Description or Part Number: <br>
 
 <?php
 
-//default query to show all products
+//default array to show no products
+$result = [];
+
+//if condition to show all products 
+if(isset($_GET['showall'])){ //this prevents the notice if GET is currently empty
 $query = $db->query("SELECT * FROM almontee3_PRODUCTS ORDER BY ProductID");
 $result = $query->fetchAll();
+}
 
 //if condition for filtering
-if(isset($_POST['filterby'])){ //this prevents the notice if post is currently empty
+if(isset($_POST['filterby'])){ //this prevents the notice if POST is currently empty
     $vehiclemodel = filter_input(INPUT_POST, 'vehiclemodel');
     $query = $db->query("SELECT * FROM almontee3_PRODUCTS WHERE FitsVehicle='$vehiclemodel' ORDER BY ProductID");
     $result = $query->fetchAll();
 }
 
 //if condition for category filtering
-if(isset($_POST['filterbycategory'])){ //this prevents the notice if post is currently empty
+if(isset($_POST['filterbycategory'])){ //this prevents the notice if POST is currently empty
     $productcategory = filter_input(INPUT_POST, 'productcategory');
     $query = $db->query("SELECT * FROM almontee3_PRODUCTS WHERE Category='$productcategory' ORDER BY ProductID");
     $result = $query->fetchAll();
 }
 
 //if condition for search
-if(isset($_POST['searchby'])){ //this prevents the notice if post is currently empty
+if(isset($_POST['searchby'])){ //this prevents the notice if POST is currently empty
     $searchterm = filter_input(INPUT_POST, 'searchterm');
     $query = $db->query("SELECT * FROM almontee3_PRODUCTS WHERE (Description LIKE '%$searchterm%') OR (ProductNumber='$searchterm') ORDER BY ProductID");
     $result = $query->fetchAll();
@@ -159,18 +202,18 @@ foreach ($result as $row)
 
 <hr style="border: 1px dotted white;" />
 
-<div id="add_a_product">
-        <h2 align="left">Add a Product :</h2>
-        <a href="sales_dashboard.php#topdashboard" style="color:lightblue; text-decoration: none">^-Return To Top</a>
-        </div><br>
-        <table style="padding: 5px; width: 35%; background-color: #614600">
+<div id="add_a_product"></div>
+        <h2 align="left" style="color: orange">Add a Product :</h2>
+        <i><a href="sales_dashboard.php#topdashboard" style="color:lightblue; text-decoration: none">^-Return To Top</a></i>
+
+        <table style="padding: 5px; width: 35%; background-color: #004c4f">
             <form action="add_product.php" method="post" enctype="multipart/form-data">
 
             <tr><td align="right"><label>Product Name: &nbsp;</label></td>
-            <td><input type="text" name="productname" size="35" required><br></td></tr>
+            <td><input type="text" name="productname" size="35" maxlength="32" required><br></td></tr>
 
             <tr><td align="right"><label>Product Number: &nbsp;</label></td>
-            <td><input type="text" name="productnumber" size="35" placeholder="Part Number" required><br></td></tr>
+            <td><input type="text" name="productnumber" size="35" maxlength="10" placeholder="Part Number" required><br></td></tr>
 
             <tr><td align="right"><label>Description: &nbsp;</label></td>
             <td><textarea name="description" rows="6" cols="37" placeholder="Describe the product..."></textarea><br></td></tr>
@@ -200,7 +243,7 @@ foreach ($result as $row)
             </select><br></td></tr>
 
             <tr><td align="right"><label>Select image of product: &nbsp;</label></td>
-            <td><input type="file" name="imagefileforcar" id="imagefileforcar"><br></td></tr>
+            <td><input type="file" name="imagefileforcar" id="imagefileforcar" required><br></td></tr>
         </table><br>
             <input type="submit" name="submit" value="Add Product">
         </form>
@@ -211,8 +254,8 @@ foreach ($result as $row)
 <hr style="border: 1px dotted white;" />
 
 <div id="inquiries">
-<h2 align="left">Inquiries Management :</h2>
-<a href="sales_dashboard.php#topdashboard" style="color:lightblue; text-decoration: none">^-Return To Top</a>
+<h2 align="left" style="color: orange">Inquiries Management :</h2>
+<i><a href="sales_dashboard.php#topdashboard" style="color:lightblue; text-decoration: none">^-Return To Top</a></i>
 </div>
 <br>
 
@@ -237,15 +280,79 @@ foreach ($inquiryresult as $row)
     <u>Comments:</u> <?php echo $row["Comments"]; ?><br>
     <form action="sales_dashboard.php?action=removeinquiry&#inquiries" method="post">
     <input type="hidden" name="removeinquiryid" value="<?php echo $row['InquiryID']; ?>">
-    <input style="background-color: white; color: black; border-radius: 2px;" type="submit" value="(Remove Inquiry)">
+    <input style="background-color: white; color: black; border-radius: 2px; font-weight: bold" type="submit" value="Remove Inquiry">
     </form>
     </div><br>
 
 <?php
 }
 ?>
-<a href="sales_dashboard.php#topdashboard" style="color:lightblue; text-decoration: none">^-Return To Top</a>
+
+
+
 <hr style="border: 1px dotted white;" />
+
+<div id="orders">
+<h2 align="left" style="color: orange">Orders Management :</h2>
+<i><a href="sales_dashboard.php#topdashboard" style="color:lightblue; text-decoration: none">^-Return To Top</a></i>
+</div>
+
+
+<?php
+
+//query all customer orders submitted
+$query = $db->query("SELECT * FROM almontee3_ORDERS ORDER BY OrderNumber");
+$orders = $query->fetchAll();
+
+foreach ($orders as $row)
+
+{
+?>
+
+    <div style="width:50%; border:1px solid black; padding: 5px; background-color:#004c4f;">
+    <br><img src="images/orders_icon.jpg" style="width:50px; height:50px; border-radius:50%"><p>
+    <u>Order Number:</u> <?php echo $row["OrderNumber"]; ?><br><br>
+    <u>Ordered by:</u> <?php echo $row["OrderedBy"]; ?><br>
+    <u>Order date:</u> <?php echo $row["OrderDate"]; ?><br>
+    <u>Order details:</u> <br><?php echo $row["OrderDetails"]; ?><br><br>
+    <u>Sales total:</u> $<?php echo number_format($row["TotalPrice"], 2); ?><br>
+    <u>Order quantity:</u> <?php echo $row["OrderQuantity"]; ?><br>
+    <u>Shipped date:</u> <?php echo $row["ShippedDate"]; ?><br>
+    <u>Shipping cost:</u> <?php echo $row["ShippingCost"]; ?><br>
+    <u>Sales discount:</u> <?php echo $row["Discount"]; ?><br>
+    <u>Status:</u> <?php echo $row["Status"]; ?><br><br>
+
+    Set Order Status:
+    <form action="update_order_status.php" method="post">
+    <input type="hidden" name="orderid" value="<?php echo $row['OrderNumber']; ?>">
+    <input type="hidden" name="orderstatus" value="Order processed successfully.">
+    <input style="background-color: #239450; color: black; border-radius: 2px; width: 25%; font-weight: bold" type="submit" value="Order Processed">
+    </form>
+
+    <form action="update_order_status.php" method="post">
+    <input type="hidden" name="orderid" value="<?php echo $row['OrderNumber']; ?>">
+    <input type="hidden" name="orderstatus" value="Order still pending.">
+    <input style="background-color: #ff8400; color: black; border-radius: 2px; width: 25%; font-weight: bold" type="submit" value="Order Pending">
+    </form>
+
+    <form action="update_order_shipped.php" method="post">
+    <input type="hidden" name="orderid" value="<?php echo $row['OrderNumber']; ?>">
+    <input type="hidden" name="ordershipped" value="<?php echo date('Y-m-d'); ?>">
+    <input style="background-color: #00b39e; color: black; border-radius: 2px; width: 25%; font-weight: bold" type="submit" value="Order Shipped">
+    </form>
+    </div><br>
+
+<?php
+}
+?>
+
+
+
+
+
+<i><a href="sales_dashboard.php#topdashboard" style="color:lightblue; text-decoration: none">^-Return To Top</a></i>
+<hr style="border: 1px dotted white;" />
+</p></div>
 <br><br>
 <footer>
 <center>

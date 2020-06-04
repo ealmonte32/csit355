@@ -18,7 +18,7 @@ $imageFileType = strtolower(pathinfo($target_file_for_image,PATHINFO_EXTENSION))
 
 // Check if file already exists in the images folder
 if (file_exists("$target_dir/$target_file_for_image")) {
-    echo "(Error) File already exists.<br>";
+    echo "(Error) File already exists or no image selected.<br>";
     echo "<a href=\"sales_dashboard.php\">Back to Sales Dashboard</a>";
     exit;
 }
@@ -76,7 +76,7 @@ if (empty($productname) || empty($productnumber) || empty($vendorid) || empty($f
     $statement->execute();
     $statement->closeCursor();
 
-    header('location: sales_dashboard.php');
+    echo "<script>alert('Product added successfully!'); window.location.href='sales_dashboard.php#add_a_product';</script>";
 }
 
 ?>

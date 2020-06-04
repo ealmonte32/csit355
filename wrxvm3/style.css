@@ -1,7 +1,6 @@
 /* ealmonte */
 
-body
-{
+body {
   color: white;
   font-family: Palatino;
   font-size: 15px;
@@ -9,18 +8,16 @@ body
 }
 
 a {
-  color: #ff6f00;
+  color: #ff6f00; /* active links will be a specific type of orange */
 }
 
-.header
-{
+.header {
   overflow: hidden;
   background-color: #1e2e47;
   padding: 20px;
 }
 
-.header a
-{
+.header a {
   color: white;
   text-align: center;
   padding: 20px;
@@ -30,57 +27,53 @@ a {
   border-radius: 12px;
 }
 
-.header a:hover
-{
+.header a:hover {
   background-color: #333b4f;
   color: white;
 }
 
-.header a.active
-{
+.header a.active {
   background-color: #495572;
   color: white;
 }
 
-img.products {
-  horizontal-align: middle;
-}
-
 /* change the styles below when browser window is 601px wide or higher */
 @media screen and (min-width: 601px){
-  img.logo
-  {
+  img.logo {
   	height: 200px;
   	width: 800px;
   	border-radius: 20px;
+  }
+  body {
+    color: white;
+    font-family: Palatino;
+    font-size: 14px;
+    line-height:1.4;
   }
 }
 
 /* change the styles below when browser window is 600px wide or less */
 @media screen and (max-width: 600px){
-  .header a
-  {
+  .header a {
     float: top;
     display: block;
     text-align: left;
   }
   
-  img.logo
-  {
+  img.logo {
 	height: 100px;
   	width: 100%;
   	border-radius: 20px;
   }
-  body
-	{
+
+  body {
  	 color: white;
  	 font-family: Palatino;
-	 font-size: 12px;
+	 font-size: 14px;
  	 line-height:1.4;
 	}
 	
-  .header a
-	{
+  .header a {
   	color: white;
   	text-align: center;
   	padding: 20px;
@@ -146,12 +139,14 @@ td {
   border: 1px solid white;
   border-radius: 2px;
 }
+
 td.tdlogin {
   border: 0px;
   padding: 2px;
   text-align: right;
 }
 
+/*use for all elements */
 * {
   box-sizing: border-box;
 }

@@ -1,6 +1,6 @@
 <?php
 //employee login
-include('../wrxvm3_priv/functions_emp.php');
+require_once('../wrxvm3_priv/functions_emp.php');
 ?>
 <!DOCTYPE html>
 <html>
