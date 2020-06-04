@@ -1,16 +1,20 @@
 <?php
+header("X-Frame-Options: SAMEORIGIN");
+header("X-XSS-Protection: 1");
+header("X-Content-Type-Options: nosniff");
+
+//user functions
+session_cache_limiter('nocache');
 session_start();
 require_once('database.php');
-
-//supress mysql warnings for security purposes, but enable only after everything is working on the backend
-//ini_set( "display_errors", 0);
+require_once('error_handling.php');
 
 
 //login button action
 if (isset($_POST['login_button'])) {
 	$login_email = filter_input(INPUT_POST, 'login_email', FILTER_SANITIZE_EMAIL);
 	$login_password = filter_input(INPUT_POST, 'login_password');
-	$hashed_login_password = sha1($login_password);
+	$hashed_login_password = sha1(sha1($login_password)); // hashing the hash is a key streching technique
 	$errors = array();
 	login();
 }
@@ -43,11 +47,16 @@ function login() {
 				if ($user['UserType'] == 'customer') {
 					$_SESSION['user'] = $user;
 					$_SESSION['fname'] = $user['FirstName'];
+					$_SESSION['lname'] = $user['LastName'];
+					$_SESSION['customerid'] = $user['CustomerID'];
+					$_SESSION['email'] = $user['Email'];
 					$_SESSION['address'] = $user['Address'];
 					$_SESSION['vehiclemodel'] = $user['VehicleModel'];
 					$_SESSION['vehicleyear'] = $user['VehicleYear'];
 					$_SESSION['telephone'] = $user['Telephone'];
+					$_SESSION['dob'] = $user['DOB'];
 					header("location: customer_dashboard.php");
+					exit;
 				}
 			}
 
@@ -56,13 +65,6 @@ function login() {
 			echo "<center><h4>(Error): User Not Found or Incorrect Password.</h4></center>";
 		}
 	}
-}
-
-// destroy and unset session if user clicks log out, then send back to login page
-if (isset($_GET['logout'])) {
-	session_destroy();
-	unset($_SESSION['user']);
-	header("location: login.php");
 }
 
 ?>
